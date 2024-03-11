@@ -1,0 +1,6 @@
+db:
+  host: "mudb.mule-training.com"
+  port: "3306"
+  user: "mule"
+  password: "mule"
+  database: "training"

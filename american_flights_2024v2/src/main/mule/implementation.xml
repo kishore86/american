@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getAllFlights" doc:id="72aa5467-b617-42c9-a43a-64cfac71851c" >
+		<db:select doc:name="Select" doc:id="1522d4cc-6ce7-4d23-945e-079d43f4283c" config-ref="american_airlines_local_db">
+			<db:sql ><![CDATA[select * from american where toAirport =:code]]></db:sql>
+			<db:input-parameters ><![CDATA[#[code :attributes.queryParams.destination]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="ff98e5ad-54ef-45d8-a0ee-781967c099d6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	airline: payload01.airlineName default "",
+	flightCode: payload01.code1,
+	fromAirportCode: payload01.fromAirport default "",
+	toAirportCode: payload01.toAirport default "",
+	departureDate: payload01.takeOffDate as String default "",
+	emptySeats: payload01.seatsAvailable default 0,
+	totalSeats: payload01.totalSeats default 0,
+	price: payload01.price default 0,
+	planeType: payload01.planeType default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="41d1d459-25a9-4ee9-945e-2df033fe6fe1" message='#["getAllFlights flow complete succesfully"]'/>
+	</flow>
+</mule>
